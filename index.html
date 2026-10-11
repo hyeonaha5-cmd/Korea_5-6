@@ -1,0 +1,517 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>고려 장인 공방</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Jua&family=Nanum+Myeongjo:wght@800&display=swap">
+<style>
+/* 배치: 왼쪽은 손으로 만지는 작업대, 오른쪽은 장인의 설명과 도구. 좁은 화면에서는 위아래로 쌓는다. */
+:root{
+  --bg:#e4ece7; --surface:#f6faf7; --bench:#d3e0d9; --ink:#1c2a26; --muted:#50625b; --line:#bccdc4;
+  --jade:#256f5f; --jade-soft:#c2ddd2; --on-jade:#f4fbf8; --good:#256f5f; --warn:#a8402a;
+  --wood:#c9995f; --wood-dark:#7a4f2c; --lacquer:#2c1d17; --copper:#b9753b; --hanji:#efe6d0; --woodink:#3a2616;
+  --display:"Jua","Gowun Dodum","Malgun Gothic",sans-serif;
+  --body:"Gowun Dodum","Malgun Gothic","Apple SD Gothic Neo",sans-serif;
+  --hanja:"Nanum Myeongjo","Batang",serif;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#111916; --surface:#1a2522; --bench:#22302c; --ink:#e3ece8; --muted:#9db1a9; --line:#31443e;
+  --jade:#74c9b2; --jade-soft:#27453d; --on-jade:#0d1a16; --good:#74c9b2; --warn:#f09a82; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --bg:#111916; --surface:#1a2522; --bench:#22302c; --ink:#e3ece8; --muted:#9db1a9; --line:#31443e;
+  --jade:#74c9b2; --jade-soft:#27453d; --on-jade:#0d1a16; --good:#74c9b2; --warn:#f09a82; color-scheme:dark }
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.65}
+.app{max-width:940px;margin:0 auto;padding-inline:16px;padding-block:14px 40px;display:flex;flex-direction:column;gap:18px}
+h1,h2,h3{font-family:var(--display);font-weight:400;line-height:1.25;margin:0;text-wrap:balance}
+p{margin:0}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible,canvas:focus-visible{outline:3px solid var(--jade);outline-offset:3px}
+
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.brand{font-family:var(--display);font-size:1.25rem;background:none;border:0;padding:6px 0}
+.brand span{color:var(--jade)}
+.dots{display:flex;gap:6px;list-style:none;margin:0;padding:0;flex-wrap:wrap}
+.dots li{width:28px;height:28px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font-size:.8rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.dots li.done{background:var(--jade-soft);border-color:var(--jade-soft);color:var(--ink)}
+.dots li.now{background:var(--jade);border-color:var(--jade);color:var(--on-jade)}
+
+/* 첫 화면 */
+.hero{display:flex;flex-direction:column;gap:8px;padding-block:10px 4px}
+.hero h1{font-size:clamp(2.1rem,7vw,3.4rem)}
+.hero h1 em{font-style:normal;color:var(--jade)}
+.hero p{max-width:34em;color:var(--muted)}
+.doors{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+.door{background:var(--surface);border:2px solid var(--line);border-radius:22px;padding:18px;text-align:left;display:flex;flex-direction:column;gap:10px;min-width:0}
+.door:hover{border-color:var(--jade)}
+.door .pic{background:var(--bench);border-radius:14px;height:210px;display:grid;place-items:center;overflow:hidden}
+.door .pic canvas{width:200px;height:200px}
+.door h2{font-size:1.6rem}
+.door p{color:var(--muted);font-size:.95rem}
+.door .go{align-self:flex-start;background:var(--jade);color:var(--on-jade);border-radius:999px;padding:8px 18px;font-family:var(--display)}
+.badge{align-self:flex-start;background:var(--jade-soft);border-radius:999px;padding:2px 12px;font-size:.85rem}
+.src{color:var(--muted);font-size:.85rem}
+
+/* 단계 화면 */
+.step{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:20px;align-items:start}
+@media (max-width:720px){.step{grid-template-columns:minmax(0,1fr)}}
+.bench{background:var(--bench);border-radius:22px;padding:16px;display:grid;place-items:center;min-height:300px;min-width:0}
+.guide{display:flex;flex-direction:column;gap:14px;min-width:0}
+.eyebrow{color:var(--jade);font-family:var(--display);font-size:.95rem;letter-spacing:.02em}
+.guide h2{font-size:clamp(1.6rem,4.5vw,2.1rem)}
+.guide .say{max-width:32em}
+.tip{background:var(--surface);border:1px dashed var(--line);border-radius:14px;padding:10px 14px;font-size:.93rem;color:var(--muted)}
+.tip b{color:var(--ink);font-weight:400;font-family:var(--display)}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.label{font-family:var(--display);font-size:.95rem;color:var(--muted)}
+.btn{background:var(--jade);color:var(--on-jade);border:0;border-radius:14px;padding:10px 18px;min-height:48px;font-family:var(--display);font-size:1.05rem}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.ghost{background:transparent;color:var(--ink);border:2px solid var(--line)}
+.chip{background:var(--surface);border:2px solid var(--line);border-radius:14px;padding:8px 14px;min-height:48px;text-align:left}
+.chip[aria-pressed="true"]{border-color:var(--jade);background:var(--jade-soft)}
+.chip small{display:block;color:var(--muted);font-size:.82rem;line-height:1.4}
+.chip.wide{flex:1 1 220px}
+.fb{min-height:1.6em;font-family:var(--display)}
+.fb.good{color:var(--good)} .fb.bad{color:var(--warn)}
+.nav{display:flex;justify-content:space-between;gap:10px;border-top:2px solid var(--line);padding-top:14px}
+input[type=range]{width:100%;accent-color:var(--jade);height:32px}
+.big{font-family:var(--display);font-size:1.5rem;font-variant-numeric:tabular-nums}
+
+/* 흙 거르는 물통 */
+.tub{position:relative;width:min(300px,100%);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 40% 35%,#b9b4a3,#8f8a7a 70%);border:10px solid var(--wood-dark)}
+.tub button{position:absolute;border:0;padding:0;width:44px;height:44px;background:none;display:grid;place-items:center}
+.tub i{display:block}
+.tub .stone i{width:24px;height:18px;border-radius:50% 45% 55% 40%;background:#4c4a45}
+.tub .leaf i{width:26px;height:13px;border-radius:0 100% 0 100%;background:#5d6b34;transform:rotate(-20deg)}
+.tub .twig i{width:28px;height:5px;border-radius:3px;background:#5a3d25;transform:rotate(30deg)}
+
+.pot{width:min(300px,100%);aspect-ratio:5/6;touch-action:manipulation}
+.pot.place{cursor:crosshair}
+.kiln{border-radius:18px;padding:8px;transition:box-shadow .4s,background .4s}
+.kiln.hot{background:radial-gradient(circle,#f0a24a55,transparent 70%);box-shadow:0 0 50px #e8742a88 inset}
+
+/* 대장경 */
+.logs{display:flex;flex-direction:column;gap:10px;width:100%}
+.log{display:flex;align-items:center;gap:12px}
+.log svg{flex:0 0 110px;height:44px}
+.slots{display:flex;gap:8px;flex-wrap:wrap;list-style:none;margin:0;padding:0;counter-reset:s}
+.slots li{flex:1 1 90px;min-height:64px;border:2px dashed var(--line);border-radius:12px;padding:8px;font-size:.9rem;counter-increment:s;background:var(--surface)}
+.slots li::before{content:counter(s) "번째";display:block;color:var(--muted);font-size:.78rem}
+.slots li.fill{border-style:solid;border-color:var(--jade)}
+.plank{width:min(280px,100%);background:var(--wood);border-radius:4px;border:2px solid var(--wood-dark);transition:height .2s}
+.ruler{display:flex;flex-direction:column;align-items:center;gap:12px;width:100%}
+.proof{display:flex;flex-direction:column;gap:14px;width:100%;align-items:center}
+.proof .line{display:flex;gap:4px;flex-wrap:wrap;justify-content:center}
+.proof .line span,.proof .line button{font-family:var(--hanja);font-size:1.5rem;width:40px;height:44px;display:grid;place-items:center;background:var(--hanji);color:#1b1410;border:1px solid #c9bb96;border-radius:4px;padding:0}
+.proof .line button.hit{background:#f3c9b8;border-color:var(--warn)}
+.carvewrap{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;width:100%}
+.carvewrap figure{margin:0;display:flex;flex-direction:column;gap:6px;align-items:center;font-size:.85rem;color:var(--muted);min-width:0}
+.carvewrap canvas{width:min(250px,100%);aspect-ratio:1;border-radius:6px;touch-action:none}
+#carve{cursor:crosshair}
+.pan{position:relative;display:flex;align-items:stretch;max-width:100%}
+.pan .face{background:var(--wood);color:var(--woodink);font-family:var(--hanja);font-size:clamp(7.5px,2.2vw,11px);line-height:1.15;writing-mode:vertical-rl;height:16.4em;padding:1.1em .6em;overflow:hidden;transform:scaleX(-1);transition:background .5s,color .5s}
+.pan.lacq .face{background:var(--lacquer);color:#8c6a4c}
+.pan .mg{flex:0 0 12px;background:var(--wood-dark);margin-block:-5px;border-radius:2px}
+.pan.lacq .mg{background:#1c120e}
+.pan .cu{position:absolute;width:14px;height:14px;background:var(--copper);border-radius:2px}
+.pan .cu.tl{left:-1px;top:-6px}.pan .cu.tr{right:-1px;top:-6px}.pan .cu.bl{left:-1px;bottom:-6px}.pan .cu.br{right:-1px;bottom:-6px}
+
+/* 완성 */
+.plate{background:var(--surface);border:2px solid var(--jade);border-radius:16px;padding:14px 16px}
+.plate small{color:var(--muted);display:block}
+.plate strong{font-family:var(--display);font-weight:400;font-size:1.45rem;line-height:1.3}
+.facts{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:4px;font-size:.95rem}
+.facts b{font-family:var(--display);font-weight:400;color:var(--jade)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <header class="top">
+    <button class="brand" id="homeBtn" data-act="home" aria-label="공방 마을 첫 화면으로">고려 <span>장인</span> 공방</button>
+    <ol class="dots" id="dots" aria-label="진행 단계"></ol>
+  </header>
+  <main id="main"></main>
+</div>
+
+<script>
+const $=(s,r=document)=>r.querySelector(s);
+const main=$('#main'), dots=$('#dots');
+
+function newC(){return{dirt:[1,1,1,1,1,1,1,1,1,1],left:0,shape:'maebyeong',wide:1,dry:null,trim:false,motifs:[],motif:'crane',clay:'white',scraped:false,bisque:false,glazed:false,temp:800,sealed:false,fired:null}}
+function newT(){return{wood:null,order:[],thick:4.0,proof:false,char:'心',cov:0,carved:false,printed:false,lacq:false,mag:false,cop:false,floor:null}}
+function loadDone(){try{return JSON.parse(localStorage.getItem('goryeo-done'))||{}}catch(e){return{}}}
+function saveDone(){try{localStorage.setItem('goryeo-done',JSON.stringify(S.done))}catch(e){}}
+let S={view:'home',step:0,msg:null,c:newC(),t:newT(),done:loadDone()};
+
+/* ---------- 청자 그리기 ---------- */
+const SHAPES={
+  maebyeong:{name:'매병',tip:'입구가 좁고 어깨가 넓은 병이에요. 술, 꿀, 참기름을 담았어요.',h:1,pts:[[0,.15],[.035,.12],[.09,.27],[.22,.46],[.42,.41],[.68,.26],[.92,.2],[1,.23]]},
+  byeong:{name:'병',tip:'목이 길고 아래가 통통한 병이에요.',h:1,pts:[[0,.13],[.04,.09],[.3,.09],[.5,.27],[.7,.42],[.88,.37],[1,.22]]},
+  daejeop:{name:'대접',tip:'위가 넓게 벌어진 그릇이에요.',h:.5,pts:[[0,.5],[.25,.47],[.65,.33],[.93,.16],[1,.18]]}
+};
+const MOTIFS={lotus:'연꽃',mum:'국화',cloud:'구름',crane:'학'};
+const BODY={wet:'#8d8f86',dry:'#b3b1a4',bisque:'#d6b294',glazed:'#d3d9d2',bisaek:'#8dbba6',brown:'#a5935a'};
+function shade(hex,a){const n=parseInt(hex.slice(1),16),t=a<0?0:255,k=Math.abs(a);
+  const f=v=>Math.round(v+(t-v)*k);return`rgb(${f(n>>16)},${f(n>>8&255)},${f(n&255)})`}
+function potStage(c){return c.fired||(c.glazed?'glazed':c.bisque?'bisque':c.dry==='shade'?'dry':'wet')}
+
+const DRAW={
+  crane(x,s,col){x.fillStyle=x.strokeStyle=col;x.lineWidth=s*.1;x.lineCap='round';
+    x.beginPath();x.ellipse(0,0,s*.42,s*.17,-.25,0,7);x.fill();
+    x.beginPath();x.moveTo(s*.35,-s*.1);x.quadraticCurveTo(s*.75,-s*.3,s*.95,-s*.55);x.stroke();
+    x.beginPath();x.arc(s*.97,-s*.58,s*.09,0,7);x.fill();
+    x.beginPath();x.moveTo(s,-s*.6);x.lineTo(s*1.25,-s*.68);x.stroke();
+    x.beginPath();x.moveTo(-s*.1,-s*.05);x.quadraticCurveTo(-s*.2,-s*.9,s*.35,-s);x.quadraticCurveTo(s*.2,-s*.4,s*.25,-s*.08);x.fill();
+    x.beginPath();x.moveTo(-s*.25,0);x.quadraticCurveTo(-s*.7,s*.75,-s*.2,s*.95);x.quadraticCurveTo(-s*.15,s*.4,s*.1,s*.1);x.fill();
+    x.beginPath();x.moveTo(-s*.38,s*.08);x.lineTo(-s,s*.3);x.stroke()},
+  cloud(x,s,col){x.fillStyle=x.strokeStyle=col;x.lineWidth=s*.12;x.lineCap='round';
+    [[-.3,0,.26],[.05,-.14,.32],[.4,.02,.24]].forEach(([a,b,r])=>{x.beginPath();x.arc(a*s,b*s,r*s,0,7);x.fill()});
+    x.beginPath();x.moveTo(-s*.3,s*.2);x.quadraticCurveTo(-s*.2,s*.6,-s*.9,s*.62);x.stroke()},
+  mum(x,s,col,col2){x.fillStyle=col;for(let i=0;i<10;i++){x.save();x.rotate(i*Math.PI/5);x.beginPath();x.ellipse(0,-s*.45,s*.12,s*.3,0,0,7);x.fill();x.restore()}
+    x.fillStyle=col2;x.beginPath();x.arc(0,0,s*.16,0,7);x.fill()},
+  lotus(x,s,col){x.fillStyle=col;[-1.2,-.6,0,.6,1.2].forEach(a=>{x.save();x.translate(0,s*.3);x.rotate(a);x.beginPath();x.moveTo(0,0);
+    x.quadraticCurveTo(-s*.26,-s*.5,0,-s);x.quadraticCurveTo(s*.26,-s*.5,0,0);x.fill();x.restore()})}
+};
+
+function drawPot(cv,c,stage){
+  const W=cv.clientWidth||300,H=cv.clientHeight||360,d=window.devicePixelRatio||1;
+  cv.width=W*d;cv.height=H*d;const x=cv.getContext('2d');x.setTransform(d,0,0,d,0,0);x.clearRect(0,0,W,H);
+  const sh=SHAPES[c.shape],ph=H*.8*sh.h,top=H*.92-ph,cx=W/2,sc=Math.min(W,H*.9)*.86;
+  const P=sh.pts.map(([t,r],i,a)=>[(i<2||i===a.length-1?r:r*c.wide)*sc,top+t*ph]),n=P.length;
+  const mid=(i,j)=>[(P[i][0]+P[j][0])/2,(P[i][1]+P[j][1])/2];
+  const path=new Path2D();path.moveTo(cx+P[0][0],P[0][1]);
+  for(let i=1;i<n-1;i++){const m=mid(i,i+1);path.quadraticCurveTo(cx+P[i][0],P[i][1],cx+m[0],m[1])}
+  path.lineTo(cx+P[n-1][0],P[n-1][1]);path.lineTo(cx-P[n-1][0],P[n-1][1]);
+  const m0=mid(n-2,n-1);path.lineTo(cx-m0[0],m0[1]);
+  for(let i=n-2;i>=1;i--){const e=i===1?P[0]:mid(i-1,i);path.quadraticCurveTo(cx-P[i][0],P[i][1],cx-e[0],e[1])}
+  path.closePath();
+  x.fillStyle='rgba(0,0,0,.16)';x.beginPath();x.ellipse(cx,top+ph+3,P[n-1][0]*1.6,7,0,0,7);x.fill();
+  const base=BODY[stage],g=x.createLinearGradient(cx-sc*.5,0,cx+sc*.5,0);
+  g.addColorStop(0,shade(base,-.35));g.addColorStop(.28,shade(base,.25));g.addColorStop(.6,base);g.addColorStop(1,shade(base,-.4));
+  x.fillStyle=g;x.fill(path);
+  x.save();x.clip(path);
+  const fired=stage==='bisaek'||stage==='brown';
+  x.globalAlpha=stage==='glazed'?.22:.94;
+  for(const m of c.motifs){
+    const white=fired?'#f3f1e4':'#efece2',dark=fired?'#262c29':'#a85a3c';
+    // 파내기만 한 무늬는 어두운 홈으로, 흙을 채운 무늬는 긁어내기 전까지 넘친 흙 얼룩과 함께 그린다
+    const groove=shade(base,-.5),col=!m.clay?groove:m.clay==='white'?white:dark,col2=!m.clay?shade(base,-.25):m.clay==='white'?dark:white;
+    x.save();x.translate(m.x*W,m.y*H);
+    if(m.clay&&!c.scraped&&(stage==='wet'||stage==='dry')){const a=x.globalAlpha;x.globalAlpha=.6;x.fillStyle=col;
+      x.beginPath();x.ellipse(2,-3,31,27,.4,0,7);x.fill();x.globalAlpha=a}
+    DRAW[m.type](x,20,col,col2);x.restore();
+  }
+  x.globalAlpha=1;
+  if(fired&&c.left>0){[[-.14,.38],[.12,.55],[.02,.28]].slice(0,Math.min(3,c.left)).forEach(([a,b])=>{
+    const bx=cx+a*sc,by=top+b*ph;x.fillStyle=shade(base,-.25);x.beginPath();x.arc(bx,by,7,0,7);x.fill();
+    x.fillStyle=shade(base,.3);x.beginPath();x.arc(bx-2,by-2,3,0,7);x.fill()})}
+  if(fired||stage==='glazed'){x.fillStyle='rgba(255,255,255,.2)';x.beginPath();x.ellipse(cx-sc*.17,top+ph*.38,sc*.04,ph*.2,.1,0,7);x.fill()}
+  x.restore();
+  cv._path=path;cv._d=d;
+}
+
+/* ---------- 공통 틀 ---------- */
+function say(t,k){S.msg={t,k};render()}
+function go(n){S.step=n;S.msg=null;render();window.scrollTo(0,0)}
+function frame(W,o){
+  const n=W.steps.length,last=S.step===n-1;
+  dots.innerHTML=W.steps.map((s,i)=>`<li class="${i<S.step?'done':i===S.step?'now':''}" title="${s.title}"${i===S.step?' aria-current="step"':''}>${i+1}</li>`).join('');
+  main.innerHTML=`<section class="step">
+    <div class="bench">${o.bench}</div>
+    <div class="guide">
+      <p class="eyebrow">${W.name} · ${S.step+1}단계 / ${n}단계</p>
+      <h2>${W.steps[S.step].title}</h2>
+      ${o.body}
+      <p class="fb ${S.msg?S.msg.k:''}" role="status">${S.msg?S.msg.t:''}</p>
+      <div class="nav">
+        ${S.step>0&&!last?'<button class="btn ghost" data-act="prev">이전</button>':'<span></span>'}
+        ${last?'<button class="btn" data-act="home">공방 마을로 돌아가기</button>'
+              :`<button class="btn" data-act="next" ${o.ok?'':'disabled'}>${o.next||'다음 단계로'}</button>`}
+      </div>
+    </div></section>`;
+  if(W.steps[S.step].mount)W.steps[S.step].mount();
+}
+const chip=(act,arg,on,label,sub,cls='')=>`<button class="chip ${cls}" data-act="${act}" data-arg="${arg}" aria-pressed="${on}">${label}${sub?`<small>${sub}</small>`:''}</button>`;
+const potCanvas=(cls='')=>`<canvas class="pot ${cls}" id="pot" role="img" aria-label="내가 만드는 청자"></canvas>`;
+const mountPot=()=>drawPot($('#pot'),S.c,potStage(S.c));
+// 그릇 안쪽을 눌렀을 때만 fn(px,py,rect)를 부른다
+function potTap(fn){mountPot();const cv=$('#pot');cv.addEventListener('click',e=>{
+  const r=cv.getBoundingClientRect(),px=e.clientX-r.left,py=e.clientY-r.top;
+  if(!cv.getContext('2d').isPointInPath(cv._path,px*cv._d,py*cv._d))return say('그릇 안쪽을 눌러 주세요.','bad');
+  fn(px,py,r)})}
+
+/* ---------- 청자 공방 ---------- */
+const DIRT=[[18,22,'stone'],[58,14,'leaf'],[72,40,'stone'],[36,44,'twig'],[12,56,'leaf'],[50,62,'stone'],[70,66,'twig'],[30,74,'leaf'],[46,30,'stone'],[24,36,'twig']];
+function celadonName(c){
+  const kinds=Object.keys(MOTIFS).filter(k=>c.motifs.some(m=>m.type===k)).map(k=>MOTIFS[k]);
+  return '청자 '+(kinds.length?'상감 '+kinds.join(' ')+' 무늬 ':'')+SHAPES[c.shape].name;
+}
+const CEL={name:'청자 공방',steps:[
+ {title:'흙 거르기',view(){const c=S.c,left=c.dirt.filter(Boolean).length;return{
+   bench:`<div class="tub" aria-label="흙을 푼 물통">${DIRT.map(([l,t,k],i)=>c.dirt[i]?`<button class="${k}" style="left:${l}%;top:${t}%" data-act="dirt" data-arg="${i}" aria-label="불순물 골라내기"><i></i></button>`:'').join('')}</div>`,
+   body:`<p class="say">청자를 만들 흙을 물에 풀었어요. 물통 속 돌멩이, 나뭇잎, 나뭇가지를 눌러서 골라내세요.</p>
+     <p class="big">남은 불순물 ${left}개</p>
+     <p class="tip"><b>장인의 말</b> 흙을 물에 풀어 체로 거르는 일을 ‘수비’라고 해요. 불순물이 남으면 구울 때 그릇이 혹처럼 부풀어 올라요.</p>`,
+   ok:true,next:left?'남은 채로 넘어가기':'다음 단계로'}}},
+ {title:'물레로 모양 빚기',view(){const c=S.c;return{
+   bench:potCanvas(),
+   body:`<p class="say">고운 흙을 물레 위에 올리고 돌리면서 모양을 만들어요. 어떤 그릇을 만들까요?</p>
+     <div class="row">${Object.entries(SHAPES).map(([k,s])=>chip('shape',k,c.shape===k,s.name,s.tip,'wide')).join('')}</div>
+     <label class="label" for="wide">몸통 너비</label>
+     <input type="range" id="wide" data-in="wide" min="0.85" max="1.15" step="0.01" value="${c.wide}">`,
+   ok:true}},mount:mountPot},
+ {title:'말리고 다듬기',view(){const c=S.c;return{
+   bench:potCanvas(),
+   body:`<p class="say">빚은 그릇은 아직 축축해요. 어디에서 말릴까요?</p>
+     <div class="row">${chip('dry','sun',c.dry==='sun','햇볕이 쨍쨍한 마당','빨리 마를 것 같아요','wide')}${chip('dry','shade',c.dry==='shade','바람이 통하는 그늘','천천히 말라요','wide')}</div>
+     <div class="row"><button class="btn" data-act="trim" ${c.dry==='shade'&&!c.trim?'':'disabled'}>${c.trim?'굽 다듬기 끝':'굽과 두께 다듬기'}</button></div>
+     <p class="tip"><b>장인의 말</b> 며칠 말린 그릇을 다시 물레에 올려 바닥(굽)을 깎고 두께를 고르게 해요. 이 일을 빼먹으면 구울 때 굽이 갈라져요.</p>`,
+   ok:c.dry==='shade'&&c.trim}},mount:mountPot},
+ {title:'상감 ① 무늬 파내기',view(){const c=S.c;return{
+   bench:potCanvas('place'),
+   body:`<p class="say">조각칼로 그릇 겉을 파내서 무늬를 새겨요. 무늬를 고르고 그릇을 눌러 보세요. 파낸 자리는 움푹 들어가서 어둡게 보여요.</p>
+     <span class="label">파낼 무늬</span>
+     <div class="row">${Object.entries(MOTIFS).map(([k,v])=>chip('motif',k,c.motif===k,v)).join('')}</div>
+     <div class="row"><button class="btn ghost" data-act="undo" ${c.motifs.length?'':'disabled'}>하나 지우기</button><span class="label">파낸 무늬 ${c.motifs.length}개</span></div>
+     <p class="tip"><b>장인의 말</b> 아직은 홈만 파인 상태예요. 다음 단계에서 이 홈에 다른 색 흙을 채워야 ‘상감’이 돼요. 무늬 없이 넘어가면 무늬 없는 청자가 돼요.</p>`,
+   ok:true,next:c.motifs.length?'홈에 흙 채우러 가기':'무늬 없이 넘어가기'}},mount(){potTap((px,py,r)=>{
+     if(S.c.motifs.length>=14)return say('무늬가 가득 찼어요. 하나 지우고 넣어 보세요.','bad');
+     S.c.motifs.push({type:S.c.motif,clay:null,x:px/r.width,y:py/r.height});S.c.scraped=false;S.msg=null;render()})}},
+ {title:'상감 ② 다른 색 흙 채우기',view(){const c=S.c,n=c.motifs.length,fill=c.motifs.filter(m=>m.clay).length,all=n>0&&fill===n;return{
+   bench:potCanvas(n?'place':''),
+   body:n?`<p class="say">파낸 홈에 다른 색 흙을 채워요. 흙을 고르고, 그릇에서 <b>파낸 무늬</b>를 하나씩 눌러 보세요. 다 채우면 넘친 흙을 긁어내요.</p>
+     <span class="label">채울 흙</span>
+     <div class="row">${chip('clay','white',c.clay==='white','흰 흙','구우면 흰색')}${chip('clay','red',c.clay==='red','붉은 흙','구우면 검은색')}</div>
+     <p class="big">${fill} / ${n}개 채웠어요</p>
+     <div class="row"><button class="btn" data-act="scrape" ${all&&!c.scraped?'':'disabled'}>${c.scraped?'긁어내기 끝':'넘친 흙 긁어내기'}</button></div>
+     <p class="tip"><b>장인의 말</b> 흙을 채우면 홈 둘레까지 흙이 묻어서 지저분해요. 겉을 살살 긁어내면 홈 속의 흙만 남아서 무늬가 또렷해져요.</p>`
+   :`<p class="say">파낸 무늬가 없어서 채울 홈이 없어요. 이대로 넘어가면 무늬 없는 청자가 돼요. 무늬를 넣고 싶으면 ‘이전’을 눌러 주세요.</p>`,
+   ok:!n||(all&&c.scraped)}},mount(){if(!S.c.motifs.length)return mountPot();potTap((px,py,r)=>{
+     let best=null,bd=40;for(const m of S.c.motifs){const d=Math.hypot(m.x*r.width-px,m.y*r.height-py);if(d<bd){bd=d;best=m}}
+     if(!best)return say('파낸 무늬를 눌러 주세요.','bad');
+     best.clay=S.c.clay;S.c.scraped=false;
+     say(S.c.motifs.every(m=>m.clay)?'홈을 모두 채웠어요. 이제 넘친 흙을 긁어내세요.':'홈에 흙을 채웠어요.','good')})}},
+ {title:'초벌구이와 유약 바르기',view(){const c=S.c;return{
+   bench:potCanvas(),
+   body:`<p class="say">그릇을 가마에서 한 번 굽고, 식힌 다음 유약을 발라요. 순서대로 눌러 보세요.</p>
+     <div class="row"><button class="btn" data-act="bisque" ${c.bisque?'disabled':''}>① 가마에서 초벌구이</button>
+     <button class="btn" data-act="glaze" ${c.bisque&&!c.glazed?'':'disabled'}>② 식혀서 유약 바르기</button></div>
+     <p class="tip"><b>장인의 말</b> 유약은 그릇 겉에 입히는 물약이에요. 지금은 뿌옇지만 뜨거운 불을 만나면 유리처럼 맑아져서 속의 무늬가 비쳐 보여요.</p>`,
+   ok:c.glazed}},mount:mountPot},
+ {title:'재벌구이',view(){const c=S.c;return{
+   bench:`<div class="kiln" id="kiln">${potCanvas()}</div>`,
+   body:`<p class="say">마지막으로 한 번 더 구워요. 불의 온도와 가마 입구를 정하고 불을 때 보세요.</p>
+     <label class="label" for="temp">가마 온도 <span class="big" id="tempv">${c.temp}도</span></label>
+     <input type="range" id="temp" data-in="temp" min="600" max="1400" step="50" value="${c.temp}">
+     <div class="row">${chip('seal','',c.sealed,c.sealed?'가마 입구를 막았어요':'가마 입구가 열려 있어요','눌러서 바꾸기','wide')}
+     <button class="btn" data-act="fire">불 때기</button></div>
+     <p class="tip"><b>장인의 말</b> 청자는 아주 뜨거운 불에서 구워요. 그리고 가마 속 공기가 색을 바꾼답니다. 잘 안 되면 다시 구워 보세요.</p>`,
+   ok:!!c.fired,next:c.fired?'완성품 보기':'다음 단계로'}},mount:mountPot},
+ {title:'청자 완성',view(){const c=S.c;S.done.c=true;saveDone();return{
+   bench:potCanvas(),
+   body:`<div class="plate"><small>유물 이름표</small><strong>${celadonName(c)}</strong>
+       <small>이름 짓는 법: 재료 → 꾸민 방법 → 무늬 → 그릇 모양</small></div>
+     <ul class="facts">
+       <li>${c.left?`불순물이 ${c.left}개 남아서 겉이 볼록 튀어나왔어요.`:'흙을 깨끗이 걸러서 겉이 매끈해요.'}</li>
+       <li>${c.fired==='bisaek'?'가마 입구를 막고 구워서 맑은 <b>비색</b>이 나왔어요.':'공기가 들어가서 누런 갈색이 되었어요. 고려 초기의 청자도 이런 색이었어요.'}</li>
+       <li>고려 사람들은 이 푸른빛을 <b>비색</b>이라고 불렀어요.</li>
+       <li>흙을 캐서 완성하기까지 <b>60~70일</b>쯤 걸렸어요.</li>
+       <li>국보 ‘청자 상감운학문 매병’에는 학이 <b>69마리</b> 새겨져 있어요.</li>
+     </ul>
+     <div class="row"><button class="btn ghost" data-act="restart" data-arg="c">처음부터 다시 만들기</button></div>`}},mount:mountPot}
+]};
+
+/* ---------- 대장경 공방 ---------- */
+const WOODS={
+  a:{name:'40년 자란 곧은 산벚나무',sub:'옹이가 없어요',ok:true,svg:'<rect x="4" y="12" width="102" height="22" rx="4" fill="#9b6a3f"/><ellipse cx="103" cy="23" rx="5" ry="11" fill="#d7b07c"/>'},
+  b:{name:'옹이가 많은 굵은 나무',sub:'가지 자국이 여러 개 있어요',msg:'옹이가 있으면 판이 고르지 않아서 글자를 새기기 어려워요.',svg:'<rect x="4" y="12" width="102" height="22" rx="4" fill="#9b6a3f"/><circle cx="30" cy="22" r="5" fill="#4d3018"/><circle cx="58" cy="26" r="4" fill="#4d3018"/><circle cx="82" cy="19" r="5" fill="#4d3018"/>'},
+  c:{name:'10년 자란 가늘고 휜 나무',sub:'가볍고 옮기기 쉬워요',msg:'너무 가늘어서 넓은 판을 만들 수 없어요. 30~50년 자란 나무를 썼어요.',svg:'<path d="M6 30 Q55 4 104 28" stroke="#9b6a3f" stroke-width="9" fill="none" stroke-linecap="round"/>'}
+};
+const ORDER=[['sea','바닷물에 담그기'],['steam','소금물에 찌기'],['shade','그늘에서 말리기']];
+const SUTRA='觀自在菩薩行深般若波羅蜜多時照見五蘊皆空度一切苦厄';
+const PROOF_A=[...'觀自在菩薩行深般若'],PROOF_B=[...'觀自在菩薩行探般若'];
+const CHARS={'心':'마음 심','大':'큰 대','高':'높을 고','國':'나라 국'};
+function panHTML(t){
+  const text=SUTRA.repeat(13).slice(0,322),cu=t.cop?'<b class="cu tl"></b><b class="cu tr"></b><b class="cu bl"></b><b class="cu br"></b>':'';
+  return `<div class="pan ${t.lacq?'lacq':''}" role="img" aria-label="경판">${t.mag?'<i class="mg"></i>':''}<div class="face" aria-hidden="true">${text}</div>${t.mag?'<i class="mg"></i>':''}${cu}</div>`;
+}
+const TRI={name:'대장경 공방',steps:[
+ {title:'나무 고르기',view(){const t=S.t;return{
+   bench:`<div class="logs">${Object.entries(WOODS).map(([k,w])=>`<button class="chip log" data-act="wood" data-arg="${k}" aria-pressed="${t.wood===k}"><svg viewBox="0 0 110 44" aria-hidden="true">${w.svg}</svg><span>${w.name}<small>${w.sub}</small></span></button>`).join('')}</div>`,
+   body:`<p class="say">몽골이 쳐들어오자, 고려 사람들은 부처님의 힘으로 나라를 지키려는 마음을 모아 대장경을 새기기로 했어요. 먼저 경판을 만들 나무를 골라 주세요.</p>
+     <p class="tip"><b>장인의 말</b> 경판 한 장은 가로 70cm, 세로 24cm예요. 넓고 고른 판이 나오는 나무가 필요해요.</p>`,
+   ok:t.wood==='a'}}},
+ {title:'나무 손질하기',view(){const t=S.t;return{
+   bench:`<ol class="slots">${[0,1,2].map(i=>`<li class="${t.order[i]?'fill':''}">${t.order[i]?ORDER.find(o=>o[0]===t.order[i])[1]:''}</li>`).join('')}</ol>`,
+   body:`<p class="say">벤 나무를 바로 쓰면 벌레가 먹고 갈라져요. 손질하는 순서대로 눌러 보세요.</p>
+     <div class="row">${[ORDER[2],ORDER[0],ORDER[1]].map(([k,v])=>`<button class="btn ghost" data-act="ord" data-arg="${k}" ${t.order.includes(k)?'disabled':''}>${v}</button>`).join('')}</div>
+     <p class="tip"><b>장인의 말</b> 소금기가 나무에 배면 벌레가 덜 먹고, 판이 뒤틀리거나 갈라지는 일도 줄어들어요.</p>`,
+   ok:t.order.length===3}}},
+ {title:'판 다듬기',view(){const t=S.t,ok=t.thick>=2.7&&t.thick<=2.9,thin=t.thick<2.7;return{
+   bench:`<div class="ruler"><div class="plank" style="height:${Math.round(t.thick*18)}px"></div><p class="big">두께 ${t.thick.toFixed(1)}cm</p></div>`,
+   body:`<p class="say">말린 판을 대패로 밀어서 두께를 맞춰요. 목표는 <b>2.8cm</b>예요. 너무 많이 밀면 안 돼요.</p>
+     <div class="row"><button class="btn" data-act="plane" ${thin?'disabled':''}>대패질 한 번</button>
+     ${thin?'<button class="btn ghost" data-act="newboard">새 판으로 다시 하기</button>':''}</div>`,
+   ok}}},
+ {title:'틀린 글자 바로잡기',view(){const t=S.t;return{
+   bench:`<div class="proof"><span class="label">바른 책</span><div class="line">${PROOF_A.map(c=>`<span>${c}</span>`).join('')}</div>
+     <span class="label">새길 원고 (글자를 눌러요)</span><div class="line">${PROOF_B.map((c,i)=>`<button data-act="proof" data-arg="${i}" class="${t.proof&&i===6?'hit':''}" aria-label="${i+1}번째 글자">${t.proof&&i===6?PROOF_A[i]:c}</button>`).join('')}</div></div>`,
+   body:`<p class="say">새기기 전에 원고를 꼼꼼히 살펴요. 위아래를 비교해서 다르게 쓴 글자 하나를 찾아 눌러 보세요.</p>
+     <p class="tip"><b>장인의 말</b> 고려 사람들은 여러 나라의 책을 서로 비교해서 틀린 곳을 고쳤어요. 그래서 5천만 자가 넘는데도 틀린 글자가 거의 없어요.</p>`,
+   ok:t.proof}}},
+ {title:'글자 새기기',view(){const t=S.t;return{
+   bench:`<div class="carvewrap"><figure><canvas id="carve" width="500" height="500" tabindex="0" aria-label="글자를 새기는 목판"></canvas><figcaption>목판: 글자가 거울처럼 뒤집혀 있어요</figcaption></figure>
+     ${t.printed?'<figure><canvas id="print" width="500" height="500" role="img" aria-label="종이에 찍은 글자"></canvas><figcaption>종이: 글자가 바르게 찍혔어요</figcaption></figure>':''}</div>`,
+   body:`<p class="say">글자를 고르고, 목판을 문질러서 <b>글자 둘레</b>를 깎아 내세요. 글자만 볼록하게 남아야 먹물이 묻어요.</p>
+     <div class="row">${Object.entries(CHARS).map(([k,v])=>chip('char',k,t.char===k,`<span style="font-family:var(--hanja);font-size:1.3rem">${k}</span> ${v}`)).join('')}</div>
+     <p class="big" id="covv">${Math.round(t.cov*100)}% 깎았어요</p>
+     <div class="row"><button class="btn ghost" data-act="auto" ${t.carved?'disabled':''}>칼질 도움 받기</button>
+     <button class="btn" id="printBtn" data-act="print" ${t.carved&&!t.printed?'':'disabled'}>먹물 묻혀 찍어 보기</button></div>
+     <p class="tip"><b>장인의 말</b> 글씨 쓴 종이를 뒤집어 붙이고 새겨요. 그래야 찍었을 때 바르게 보이거든요. 솜씨 좋은 장인도 하루에 40~50자밖에 못 새겼어요.</p>`,
+   ok:t.printed}},mount:mountCarve},
+ {title:'경판 마무리하기',view(){const t=S.t;return{
+   bench:panHTML(t),
+   body:`<p class="say">글자를 다 새긴 경판이에요. 한 면에 23줄, 한 줄에 14자씩 들어가요. 오래 가도록 세 가지 마무리를 해 주세요.</p>
+     <div class="row">
+       ${chip('fin','lacq',t.lacq,'옻칠하기','벌레와 습기를 막아요','wide')}
+       ${chip('fin','mag',t.mag,'마구리 끼우기','양 끝에 두꺼운 손잡이 나무를 대요','wide')}
+       ${chip('fin','cop',t.cop,'구리판 붙이기','네 귀퉁이를 잡아 줘서 뒤틀리지 않아요','wide')}</div>
+     <p class="tip"><b>장인의 말</b> 마구리가 글자 면보다 두꺼워서, 경판을 나란히 세워도 글자끼리 닿지 않고 사이로 바람이 통해요.</p>`,
+   ok:t.lacq&&t.mag&&t.cop}}},
+ {title:'장경판전에 보관하기',view(){const t=S.t;return{
+   bench:panHTML(t),
+   body:`<p class="say">완성한 경판을 해인사 장경판전에 보관해요. 나무는 습기에 약해요. 건물 바닥을 어떻게 만들까요?</p>
+     <div class="row">
+       ${chip('floor','stone',t.floor==='stone','반들반들한 돌바닥','','wide')}
+       ${chip('floor','soil',t.floor==='soil','숯, 횟가루, 소금, 모래를 차례로 깐 흙바닥','','wide')}
+       ${chip('floor','wood',t.floor==='wood','나무 마룻바닥','','wide')}</div>
+     <p class="tip"><b>장인의 말</b> 장경판전은 남쪽과 북쪽 창의 크기를 서로 다르게 만들었어요. 들어온 바람이 건물 안을 위아래로 한 바퀴 돌고 나가요.</p>`,
+   ok:t.floor==='soil',next:'완성 보기'}}},
+ {title:'팔만대장경 완성',view(){const t=S.t;S.done.t=true;saveDone();return{
+   bench:panHTML(t),
+   body:`<div class="plate"><small>내가 새긴 글자</small><strong><span style="font-family:var(--hanja)">${t.char}</span> ${CHARS[t.char]}</strong>
+       <small>경판 한 장에는 이런 글자가 644자 들어가요.</small></div>
+     <ul class="facts">
+       <li>경판은 모두 <b>81,258장</b>, 8만 장이 넘어서 ‘팔만대장경’이에요.</li>
+       <li>1236년에 시작해 1251년에 끝냈어요. <b>16년</b>이 걸렸어요.</li>
+       <li>하루 40~50자씩 새기면 한 장(644자)에 <b>13~16일</b>이 걸려요.</li>
+       <li>경판을 모두 쌓으면 <b>2,400m</b>가 넘어요. 백두산(2,744m)과 비슷해요.</li>
+       <li>장경판전은 1995년 유네스코 <b>세계유산</b>, 경판은 2007년 <b>세계기록유산</b>이 되었어요.</li>
+     </ul>
+     <div class="row"><button class="btn ghost" data-act="restart" data-arg="t">처음부터 다시 만들기</button></div>`}}}
+]};
+
+/* 글자 새기기 캔버스 */
+function mountCarve(){
+  const t=S.t,cv=$('#carve'),N=250,K=2,x=cv.getContext('2d'),font=`800 185px "Nanum Myeongjo","Batang",serif`;
+  const start=()=>{
+    if(!cv.isConnected)return;
+    const glyph=document.createElement('canvas');glyph.width=glyph.height=N*K;const g=glyph.getContext('2d');
+    g.scale(K,K);g.translate(N,0);g.scale(-1,1);g.font=font;g.textAlign='center';g.textBaseline='middle';g.fillStyle='#1a120c';g.fillText(t.char,N/2,N/2+6);
+    const data=g.getImageData(0,0,N*K,N*K).data,G=20,cell=N/G,cells=[];
+    for(let j=0;j<G;j++)for(let i=0;i<G;i++){const px=Math.floor((i+.5)*cell*K),py=Math.floor((j+.5)*cell*K);
+      cells.push({x:(i+.5)*cell,y:(j+.5)*cell,glyph:data[(py*N*K+px)*4+3]>60,cut:false})}
+    const total=cells.filter(c=>!c.glyph).length;
+    const layer=document.createElement('canvas');layer.width=layer.height=N*K;const l=layer.getContext('2d');l.scale(K,K);
+    const protect=()=>{l.save();l.setTransform(1,0,0,1,0,0);l.globalCompositeOperation='destination-out';l.drawImage(glyph,0,0);l.restore()};
+    const draw=()=>{x.setTransform(K,0,0,K,0,0);x.fillStyle='#c9995f';x.fillRect(0,0,N,N);
+      x.strokeStyle='rgba(122,79,44,.25)';x.lineWidth=1;for(let i=0;i<12;i++){x.beginPath();x.moveTo(0,10+i*21);x.bezierCurveTo(80,4+i*21,170,18+i*21,N,9+i*21);x.stroke()}
+      x.drawImage(layer,0,0,N,N);x.globalAlpha=t.carved?.95:.6;x.drawImage(glyph,0,0,N,N);x.globalAlpha=1};
+    const fill=()=>{l.fillStyle='#7a4f2c';l.fillRect(0,0,N,N);protect()};
+    const finish=()=>{t.carved=true;t.cov=1;fill();draw();$('#covv').textContent='100% 깎았어요';$('#printBtn').disabled=t.printed;
+      const a=main.querySelector('[data-act="auto"]');if(a)a.disabled=true};
+    const cut=(px,py)=>{if(t.carved)return;const R=20;l.fillStyle='#7a4f2c';l.beginPath();l.arc(px,py,R,0,7);l.fill();protect();
+      for(const c of cells)if(!c.glyph&&!c.cut&&(c.x-px)**2+(c.y-py)**2<R*R)c.cut=true;
+      t.cov=cells.filter(c=>c.cut).length/total;
+      if(t.cov>=.8)finish();else{$('#covv').textContent=Math.round(t.cov*100)+'% 깎았어요';draw()}};
+    if(t.carved)fill();draw();
+    let down=false;const at=e=>{const r=cv.getBoundingClientRect();cut((e.clientX-r.left)/r.width*N,(e.clientY-r.top)/r.height*N)};
+    cv.addEventListener('pointerdown',e=>{down=true;try{cv.setPointerCapture(e.pointerId)}catch(_){}at(e)});
+    cv.addEventListener('pointermove',e=>{if(down)at(e)});
+    ['pointerup','pointercancel'].forEach(n=>cv.addEventListener(n,()=>down=false));
+    cv._finish=finish;
+    const pr=$('#print');if(pr){const p=pr.getContext('2d');p.scale(K,K);p.fillStyle='#efe6d0';p.fillRect(0,0,N,N);
+      p.font=font;p.textAlign='center';p.textBaseline='middle';p.fillStyle='rgba(20,14,10,.9)';p.fillText(t.char,N/2,N/2+6)}
+  };
+  const ready=document.fonts&&document.fonts.load?document.fonts.load(font,t.char):Promise.resolve();
+  ready.then(start,start);
+}
+
+/* ---------- 첫 화면 ---------- */
+function home(){
+  dots.innerHTML='';
+  main.innerHTML=`<div class="app" style="padding:0">
+    <div class="hero"><h1>오늘은 내가 <em>고려의 장인</em></h1>
+      <p>흙을 빚어 청자를 굽고, 나무판에 글자를 새겨 대장경을 만들어 보세요. 장인이 하던 순서 그대로 따라가요.</p></div>
+    <div class="doors">
+      <button class="door" data-act="open" data-arg="c"><span class="pic"><canvas id="demoPot"></canvas></span>
+        ${S.done.c?'<span class="badge">완성한 적 있어요</span>':''}<h2>청자 공방</h2>
+        <p>흙 거르기부터 재벌구이까지 8단계. 푸른 비색을 낼 수 있을까요?</p><span class="go">청자 만들러 가기</span></button>
+      <button class="door" data-act="open" data-arg="t"><span class="pic">${panHTML({lacq:true,mag:true,cop:true})}</span>
+        ${S.done.t?'<span class="badge">완성한 적 있어요</span>':''}<h2>대장경 공방</h2>
+        <p>나무 고르기부터 보관까지 8단계. 글자를 거꾸로 새겨 종이에 찍어요.</p><span class="go">대장경 새기러 가기</span></button>
+    </div>
+    <p class="src">내용 출처: 국사편찬위원회 우리역사넷, 강진신문 청자 제작 과정 기사, 경향신문 해인사 팔만대장경 기사.</p></div>`;
+  const demo=Object.assign(newC(),{motifs:[{type:'crane',clay:'white',x:.4,y:.38},{type:'cloud',clay:'white',x:.62,y:.3},{type:'cloud',clay:'red',x:.36,y:.56},{type:'crane',clay:'white',x:.58,y:.6}]});
+  drawPot($('#demoPot'),demo,'bisaek');
+}
+function render(){
+  $('#homeBtn').hidden=false;
+  if(S.view==='home')return home();
+  frame(S.view==='c'?CEL:TRI,(S.view==='c'?CEL:TRI).steps[S.step].view());
+}
+
+/* ---------- 동작 ---------- */
+const ACT={
+  home(){S.view='home';S.msg=null;render();window.scrollTo(0,0)},
+  open(a){S.view=a;go(S.step=0)},
+  next(){go(S.step+1)}, prev(){go(S.step-1)},
+  restart(a){if(a==='c')S.c=newC();else S.t=newT();go(0)},
+  dirt(i){S.c.dirt[i]=0;S.c.left=S.c.dirt.filter(Boolean).length;S.msg=S.c.left?null:{t:'흙이 깨끗해졌어요!',k:'good'};render()},
+  shape(k){S.c.shape=k;S.c.motifs=[];S.c.scraped=false;render()},
+  dry(k){S.c.dry=k==='shade'?'shade':null;
+    k==='sun'?say('앗, 너무 빨리 마르면 금이 갈 수 있어요. 다른 곳을 골라 보세요.','bad'):say('좋아요! 고려 장인들도 그늘에서 천천히 말렸어요.','good')},
+  trim(){S.c.trim=true;say('굽을 깎고 두께를 고르게 다듬었어요.','good')},
+  motif(k){S.c.motif=k;render()}, clay(k){S.c.clay=k;render()},
+  undo(){S.c.motifs.pop();S.msg=null;render()},
+  scrape(){S.c.scraped=true;say('넘친 흙을 긁어냈어요. 홈 속의 흙만 남아 무늬가 또렷해졌어요!','good')},
+  bisque(){S.c.bisque=true;say('초벌구이 끝! 그릇이 단단해졌어요.','good')},
+  glaze(){S.c.glazed=true;say('유약을 발랐어요. 무늬가 뿌옇게 가려졌네요.','good')},
+  seal(){S.c.sealed=!S.c.sealed;render()},
+  fire(){const c=S.c,k=$('#kiln');k.classList.add('hot');main.querySelectorAll('button,input').forEach(b=>b.disabled=true);
+    setTimeout(()=>{if(c.temp<1200){c.fired=null;say('온도가 낮아서 유약이 녹지 않았어요. 1,200도보다 뜨겁게 해 보세요.','bad')}
+      else if(!c.sealed){c.fired='brown';say('누런 갈색이 되었어요. 가마에 공기가 들어갔기 때문이에요. 입구를 막고 다시 구워 볼까요?','bad')}
+      else{c.fired='bisaek';say('성공! 공기를 막고 뜨겁게 구워서 맑은 비색이 나왔어요.','good')}},1100)},
+  wood(k){S.t.wood=k;WOODS[k].ok?say('잘 골랐어요! 대장경에는 산벚나무를 가장 많이 썼어요.','good'):say(WOODS[k].msg,'bad')},
+  ord(k){const t=S.t,want=ORDER[t.order.length];
+    if(k!==want[0])return say(`아직이에요. 먼저 ‘${want[1]}’부터 해야 해요.`,'bad');
+    t.order.push(k);say(t.order.length===3?'나무 손질 끝! 이제 판으로 다듬을 수 있어요.':'맞아요!','good')},
+  plane(){const t=S.t;t.thick=Math.round((t.thick-.2)*10)/10;
+    t.thick<2.7?say('앗, 너무 얇아졌어요! 얇은 판은 쉽게 휘어요.','bad'):t.thick<=2.9?say('딱 맞아요! 2.8cm 완성.','good'):say('쓱쓱, 조금 더 밀어요.','')},
+  newboard(){S.t.thick=4.0;S.msg=null;render()},
+  proof(i){if(+i===6){S.t.proof=true;say('찾았어요! ‘깊을 심(深)’ 자를 잘못 썼네요. 바르게 고쳤어요.','good')}else say('그 글자는 똑같아요. 다시 살펴보세요.','bad')},
+  char(k){const t=S.t;t.char=k;t.cov=0;t.carved=false;t.printed=false;S.msg=null;render()},
+  auto(){const cv=$('#carve');if(cv&&cv._finish)cv._finish()},
+  print(){S.t.printed=true;say('찍혔어요! 거꾸로 새긴 글자가 종이에는 바르게 나왔어요.','good')},
+  fin(k){S.t[k]=!S.t[k];S.msg=null;render()},
+  floor(k){S.t.floor=k;k==='soil'?say('정답! 비가 많이 오면 습기를 빨아들이고, 건조하면 내보내요. 벌레도 막아 줘요.','good')
+    :say(k==='stone'?'돌바닥은 습기를 조절하지 못해요. 다시 골라 보세요.':'나무 마루는 습기와 벌레에 약해요. 다시 골라 보세요.','bad')}
+};
+document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(b&&!b.disabled)ACT[b.dataset.act](b.dataset.arg)});
+document.addEventListener('input',e=>{const k=e.target.dataset.in;
+  if(k==='wide'){S.c.wide=+e.target.value;mountPot()}
+  if(k==='temp'){S.c.temp=+e.target.value;$('#tempv').textContent=S.c.temp.toLocaleString()+'도'}});
+let rz;window.addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(()=>{const p=$('#pot');if(p)mountPot();const d=$('#demoPot');if(d)render()},150)});
+
+function boot(data){if(data&&data.S)S=Object.assign(S,data.S);render()}
+const hot=window.claude&&window.claude.hot;
+if(hot&&hot.snapshot)hot.snapshot(()=>({S}));
+if(hot&&hot.ready)hot.ready(boot);else boot(hot&&hot.data||{});
+</script>
+</body>
+</html>
